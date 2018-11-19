@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using WcfService1.Models;
 
 namespace WcfService1
 {
@@ -12,22 +13,35 @@ namespace WcfService1
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        public string GetData(int value)
+        private Library db = new Library();
+        public int Delete(string id)
         {
-            return string.Format("You entered: {0}", value);
+            int bid = Convert.ToInt32(id);
+            db.Books.Remove(db.Books.Find(bid));
+            return db.SaveChanges();
         }
 
-        public CompositeType GetDataUsingDataContract(CompositeType composite)
+        public IEnumerable<Book> GetAll()
         {
-            if (composite == null)
-            {
-                throw new ArgumentNullException("composite");
-            }
-            if (composite.BoolValue)
-            {
-                composite.StringValue += "Suffix";
-            }
-            return composite;
+            return db.Books.ToList();
+        }
+
+        public Book GetById(string id)
+        {
+            int bid = Convert.ToInt32(id);
+            return db.Books.Find(bid);
+        }
+
+        public int Save(Book book)
+        {
+            db.Books.Add(book);
+            return db.SaveChanges();
+        }
+
+        public int Update(Book book)
+        {
+            db.Entry(book).State = System.Data.Entity.EntityState.Modified;
+            return db.SaveChanges();
         }
     }
 }
